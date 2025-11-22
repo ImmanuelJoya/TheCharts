@@ -142,14 +142,18 @@ class FreeCryptoAPIService:
         elif endpoint == "/getTop":
             limit = params.get("limit", 10)
             cryptos = []
+            crypto_names = {"BTC": "Bitcoin", "ETH": "Ethereum", "ADA": "Cardano", "SOL": "Solana", "DOT": "Polkadot"}
             for i, (symbol, data) in enumerate(mock_cryptos.items()):
                 if i >= limit:
                     break
                 cryptos.append({
+                    "rank": i + 1,
                     "symbol": symbol,
+                    "name": crypto_names.get(symbol, symbol),
                     "price": data["price"] * (1 + random.uniform(-0.02, 0.02)),
-                    "change_24h": data["change_24h"] * (1 + random.uniform(-0.1, 0.1)),
-                    "volume": data["volume"] * (1 + random.uniform(-0.2, 0.2))
+                    "market_cap": data["price"] * 19000000 * (1 + random.uniform(-0.1, 0.1)),  # Rough market cap calculation
+                    "volume_24h": data["volume"] * (1 + random.uniform(-0.2, 0.2)),
+                    "change_24h": data["change_24h"] * (1 + random.uniform(-0.1, 0.1))
                 })
             return {"status": True, "data": cryptos}
 
