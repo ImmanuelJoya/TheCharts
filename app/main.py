@@ -22,11 +22,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     
-    # Include routers
-    app.include_router(market.router)
-    app.include_router(exchange.router)
-    app.include_router(conversion.router)
-    app.include_router(historical.router)
+    # Include routers with /api prefix
+    app.include_router(market.router, prefix="/api")
+    app.include_router(exchange.router, prefix="/api")
+    app.include_router(conversion.router, prefix="/api")
+    app.include_router(historical.router, prefix="/api")
     
     # WebSocket
     app.mount("/ws", websocket.socket_app)
