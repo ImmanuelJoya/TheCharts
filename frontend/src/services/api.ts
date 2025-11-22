@@ -25,7 +25,7 @@ export const marketApi = {
         return response.data;
     },
 
-    getFearGreed: async (): Promise<FearGreedResponse> => {
+    getFearGreed: async () => {
         const response = await api.get('/market/fear-greed');
         return response.data;
     },
