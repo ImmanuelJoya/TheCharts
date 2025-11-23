@@ -28,8 +28,8 @@ def create_app() -> FastAPI:
     app.include_router(conversion.router, prefix="/api")
     app.include_router(historical.router, prefix="/api")
     
-    # WebSocket
-    app.mount("/ws", websocket.socket_app)
+    # WebSocket - Mount at root for socket.io compatibility
+    app.mount("/", websocket.socket_app)
     
     @app.get("/")
     async def root():
