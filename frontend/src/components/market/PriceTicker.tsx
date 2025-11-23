@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import { marketApi } from '../../services/api';
 import type { CryptoPair } from '../../types';
 
 interface Props {
@@ -9,7 +10,28 @@ interface Props {
 export const PriceTicker = ({ symbols }: Props) => {
     const { data, isConnected } = useWebSocket(symbols);
     const [tickers, setTickers] = useState<Record<string, CryptoPair>>({});
+    const [loading, setLoading] = useState(true);
 
+    // Load initial data from API
+    useEffect(() => {
+        const loadInitialData = async () => {
+            try {
+                setLoading(true);
+                const response = await marketApi.getCryptoData(symbols, 'USD');
+                if (response.data) {
+                    setTickers(response.data);
+                }
+            } catch (error) {
+                console.error('Failed to load initial ticker data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadInitialData();
+    }, [symbols.join(',')]);
+
+    // Update with WebSocket data when available
     useEffect(() => {
         if (Object.keys(data).length > 0) {
             setTickers(prev => ({ ...prev, ...data }));
