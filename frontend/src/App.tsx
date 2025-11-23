@@ -6,11 +6,28 @@ import type { TopCrypto, FearGreedResponse } from './types';
 function App() {
   const [fearGreed, setFearGreed] = useState<FearGreedResponse | null>(null);
   const [topCryptos, setTopCryptos] = useState<TopCrypto[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load initial data
-    marketApi.getFearGreed().then(setFearGreed);
-    marketApi.getTopCryptos(10).then(setTopCryptos);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        // Load initial data
+        const [fearGreedData, topCryptosData] = await Promise.all([
+          marketApi.getFearGreed(),
+          marketApi.getTopCryptos(10)
+        ]);
+
+        setFearGreed(fearGreedData);
+        setTopCryptos(topCryptosData || []);
+      } catch (error) {
+        console.error('Failed to load market data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (
