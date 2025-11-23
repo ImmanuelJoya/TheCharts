@@ -11,16 +11,11 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
       },
-      // Add WebSocket proxy
-      '/ws': {
-        target: 'ws://localhost:8000',
-        ws: true,
+      // WebSocket proxy for socket.io
+      '/socket.io': {
+        target: 'http://localhost:8000',
         changeOrigin: true,
-      },
-      '/socket.io': {  // Also handle direct socket.io paths
-        target: 'ws://localhost:8000',
         ws: true,
-        changeOrigin: true,
       },
     },
   },

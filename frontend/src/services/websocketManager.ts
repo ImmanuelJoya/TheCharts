@@ -6,11 +6,13 @@ class WebSocketManager {
     private subscribedSymbols: Set<string> = new Set();
     private messageHandlers: Array<(data: Record<string, CryptoPair>) => void> = [];
 
-    connect(url = 'http://localhost:8000') {
+    connect() {
         if (this.socket?.connected) return;
 
-        this.socket = io(url, {
-            transports: ['websocket'],
+        // Connect through the Vite proxy
+        this.socket = io('/', {
+            path: '/socket.io',
+            transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
