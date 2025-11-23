@@ -3,15 +3,18 @@ from typing import Dict, List, Optional, Any
 from fastapi import HTTPException, status
 import asyncio
 from app.config import Settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FreeCryptoAPIService:
     def __init__(self, settings: Settings):
         self.api_key = settings.freecrypto_api_key
         self.base_url = settings.freecrypto_base_url
+        # Removed API key from headers - will add to params instead
         self.client = httpx.AsyncClient(
             base_url=self.base_url,
             timeout=30.0,
-            headers={"X-API-KEY": self.api_key}
         )
     
     async def __aenter__(self):
@@ -22,21 +25,33 @@ class FreeCryptoAPIService:
     
     async def _make_request(self, endpoint: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
         """Make authenticated request to FreeCryptoAPI"""
+        if params is None:
+            params = {}
+        
+        # Add API key to every request as a query parameter
+        params['api_key'] = self.api_key
+        
+        # Debug logging to see what we're calling
+        logger.info(f"Calling {self.base_url}{endpoint} with params: {list(params.keys())}")
+        
         try:
             response = await self.client.get(endpoint, params=params)
             response.raise_for_status()
             return response.json()
         except httpx.HTTPStatusError as e:
+            logger.error(f"FreeCryptoAPI error: {e.response.status_code} - {e.response.text[:200]}")
             raise HTTPException(
                 status_code=e.response.status_code,
                 detail=f"FreeCryptoAPI error: {e.response.text}"
             )
         except httpx.RequestError as e:
+            logger.error(f"Service error: {e}")
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=f"Service unavailable: {str(e)}"
             )
         except Exception as e:
+            logger.error(f"Unexpected error: {e}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Unexpected error: {str(e)}"
